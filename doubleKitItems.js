@@ -6,7 +6,6 @@ module.exports = async function helpItems (db) {
 
   let result = [];
 
-
   let items = await db.collection("items").find(
     {
       $or: [
@@ -20,22 +19,26 @@ module.exports = async function helpItems (db) {
             $exists: 1
           }
         }
-      ]
+      ],
+      status: 'site'
     }, ['reqItems', 'freeItems', 'axaptaItemId', 'kitItem']
   ).toArray();
 
   items.forEach(item => {
+    let ids = [];
 
-    Object.keys(item.kitItem).forEach(typeKit => {
-      let middle = [];
-      if (item[typeKit].length >= 2) {
-        item[typeKit].forEach(itemKit => {
+    item.reqItems.forEach(req=>{
+      ids.push(req.itemId);
+    });
 
-          ~middle.indexOf(itemKit.itemId) ? result.push(item.axaptaItemId) : middle.push(itemKit.itemId);
+    item.freeItems.forEach(free=>{
+      ids.push(free.itemId);
+    });
 
-        })
-      }
-    })
+    ids.forEach((id, index) => {
+      if (ids.indexOf(id) !== index) result.push(item.axaptaItemId);
+    });
+
   });
 
   return result;
